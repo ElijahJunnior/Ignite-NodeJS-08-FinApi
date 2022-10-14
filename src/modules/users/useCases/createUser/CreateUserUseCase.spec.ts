@@ -1,15 +1,15 @@
-import { AppError } from "../../../../shared/errors/AppError";
 import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUsersRepository";
 import { IUsersRepository } from "../../repositories/IUsersRepository";
-import { CreateUserUseCase } from "./CreateUserUseCase"
+import { CreateUserError } from "./CreateUserError";
+import { CreateUserUseCase } from "./CreateUserUseCase";
 
-let usersRepository: IUsersRepository
+let usersRepository: IUsersRepository;
 let createUserUseCase: CreateUserUseCase;
 
 describe("Create User Use Case Test", () => {
   beforeEach(() => {
     usersRepository = new InMemoryUsersRepository();
-    createUserUseCase = new CreateUserUseCase(usersRepository)
+    createUserUseCase = new CreateUserUseCase(usersRepository);
   })
 
   it("Should be able to create one user", async () => {
@@ -17,7 +17,7 @@ describe("Create User Use Case Test", () => {
       name: "Test User",
       email: "test.user@test.com",
       password: "password123"
-    })
+    });
 
     expect(user).toHaveProperty("id");
   })
@@ -30,18 +30,17 @@ describe("Create User Use Case Test", () => {
         name: "Test User",
         email: "test.user@test.com",
         password: "password123"
-      })
+      });
 
       await createUserUseCase.execute({
         name: "Test User",
         email: "test.user@test.com",
         password: "password123"
-      })
+      });
     } catch(err) {
       error = err;
     }
 
-    expect(error).toBeInstanceOf(AppError);
-    expect(error).toEqual(new AppError("User already exists"))
+    expect(error).toEqual(new CreateUserError());
   })
 })

@@ -1,5 +1,5 @@
 import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUsersRepository";
-import { IUsersRepository } from "../../repositories/IUsersRepository"
+import { IUsersRepository } from "../../repositories/IUsersRepository";
 import { ShowUserProfileError } from "./ShowUserProfileError";
 import { ShowUserProfileUseCase } from "./ShowUserProfileUseCase";
 
@@ -35,6 +35,6 @@ describe("Show User Profile Use Case", () => {
       error = err;
     }
 
-    expect(error).toEqual(new ShowUserProfileError())
+    expect(error).toEqual(new ShowUserProfileError());
   })
 })

@@ -3,6 +3,7 @@ import { AppError } from "../../../../shared/errors/AppError";
 import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUsersRepository";
 import { IUsersRepository } from "../../repositories/IUsersRepository"
 import { AuthenticateUserUseCase } from "./AuthenticateUserUseCase";
+import { IncorrectEmailOrPasswordError } from "./IncorrectEmailOrPasswordError";
 
 let usersRepository: IUsersRepository;
 let authenticateUserUseCase: AuthenticateUserUseCase;
@@ -52,7 +53,7 @@ describe("Authenticate User Use Case", () => {
       error = err;
     }
 
-    expect(error).toEqual(new AppError("Incorrect email or password", 401));
+    expect(error).toEqual(new IncorrectEmailOrPasswordError());
   })
 
   it("Should not be able to authenticate user with incorrect password", async () => {
@@ -76,6 +77,6 @@ describe("Authenticate User Use Case", () => {
       error = err;
     }
 
-    expect(error).toEqual(new AppError("Incorrect email or password", 401));
+    expect(error).toEqual(new IncorrectEmailOrPasswordError());
   })
 })
