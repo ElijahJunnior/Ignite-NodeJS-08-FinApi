@@ -1,7 +1,6 @@
 import { hash } from "bcryptjs";
-import { AppError } from "../../../../shared/errors/AppError";
 import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUsersRepository";
-import { IUsersRepository } from "../../repositories/IUsersRepository"
+import { IUsersRepository } from "../../repositories/IUsersRepository";
 import { AuthenticateUserUseCase } from "./AuthenticateUserUseCase";
 import { IncorrectEmailOrPasswordError } from "./IncorrectEmailOrPasswordError";
 
@@ -16,7 +15,7 @@ describe("Authenticate User Use Case", () => {
 
   it("Should be able to authenticate user", async () => {
     const email = "test.user@test.com";
-    const password = "password123"
+    const password = "password123";
     const password_hash = await hash(password, 8);
 
     await usersRepository.create({
@@ -27,7 +26,7 @@ describe("Authenticate User Use Case", () => {
 
     const auth = await authenticateUserUseCase.execute({
       email, password
-    })
+    });
 
     expect(auth).toHaveProperty("token");
   })
@@ -43,7 +42,7 @@ describe("Authenticate User Use Case", () => {
         email: "test.user@test.com",
         name: "Test User",
         password: password_hash
-      })
+      });
 
       await authenticateUserUseCase.execute({
         email: "incorrect@test.com",
@@ -67,7 +66,7 @@ describe("Authenticate User Use Case", () => {
         email,
         name: "Test User",
         password: password_hash
-      })
+      });
 
       await authenticateUserUseCase.execute({
         email,
