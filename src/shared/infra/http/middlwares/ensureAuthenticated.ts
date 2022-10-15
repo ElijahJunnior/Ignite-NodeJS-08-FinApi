@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { verify } from 'jsonwebtoken';
 
-import authConfig from '../../../../config/auth';
+import getAuthConfig from '../../../../config/auth';
 import { JWTInvalidTokenError } from "../../../errors/JWTInvalidTokenError";
 import { JWTTokenMissingError } from "../../../errors/JWTTokenMissingError";
 
@@ -14,6 +14,7 @@ export async function ensureAuthenticated(
   response: Response,
   next: NextFunction
 ) {
+  const authConfig = getAuthConfig();
   const authHeader = request.headers.authorization;
 
   if (!authHeader) {

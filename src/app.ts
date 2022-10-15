@@ -4,12 +4,14 @@ import 'express-async-errors';
 import express from 'express';
 import cors from 'cors';
 
-import './database';
 import './shared/container';
 import { router } from './routes';
 import { AppError } from './shared/errors/AppError';
+import { createDatabaseConnection } from './database';
 
 const app = express();
+
+createDatabaseConnection();
 
 app.use(cors());
 app.use(express.json());
