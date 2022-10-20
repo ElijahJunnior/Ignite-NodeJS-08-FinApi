@@ -52,7 +52,7 @@ describe("Create Statement Controller", () => {
       .post("/api/v1/statements/deposit")
       .send({
         amount: 120.00,
-        description: "Test deposit statement"
+        description: "Test deposit statement",
       })
       .set({
         Authorization: `Bearer ${token}`
