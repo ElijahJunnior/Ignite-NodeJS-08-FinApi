@@ -7,4 +7,6 @@ Pick<
   'description' |
   'amount' |
   'type'
->
+> & {
+  sender_id?: string
+}
