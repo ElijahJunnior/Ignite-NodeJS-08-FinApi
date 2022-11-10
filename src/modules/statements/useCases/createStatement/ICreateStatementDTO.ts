@@ -6,7 +6,6 @@ Pick<
   'user_id' |
   'description' |
   'amount' |
-  'type'
-> & {
-  sender_id?: string
-}
+  'type' |
+  'sender_id'
+>
