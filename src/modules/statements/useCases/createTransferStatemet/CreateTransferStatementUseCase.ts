@@ -15,11 +15,11 @@ class CreateTransferStatementUseCase {
   ) {}
 
   async execute({
-    amount, description, type, user_id, sender_id
+    amount, description, type, user_id, sender_id = ""
   }: CreateTransferStatementDTO): Promise<Statement> {
-    const sender_user = await this.usersRepository.findById(user_id);
+    const senderUser = await this.usersRepository.findById(sender_id);
 
-    if (!sender_user) {
+    if (!senderUser) {
       throw new CreateTransferStatementError.UserNotFound();
     }
 
@@ -32,9 +32,9 @@ class CreateTransferStatementUseCase {
       throw new CreateTransferStatementError.InsufficientFounds();
     }
 
-    const recipient_user = await this.usersRepository.findById(user_id);
+    const recipientUser = await this.usersRepository.findById(user_id);
 
-    if (!recipient_user) {
+    if (!recipientUser) {
       throw new CreateTransferStatementError.RecipientUserNotFound();
     }
 
