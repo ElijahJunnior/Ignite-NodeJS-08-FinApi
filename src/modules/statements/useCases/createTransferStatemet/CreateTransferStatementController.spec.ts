@@ -6,7 +6,6 @@ import { createDatabaseConnection } from "../../../../database";
 import { AppError } from "../../../../shared/errors/AppError";
 
 let connection: Connection;
-let senderUserID: string;
 let recipientUserID: string;
 let senderUserToken: string;
 
@@ -32,7 +31,20 @@ describe("Create Transfer Statement Controller", () => {
       );
     }
 
-    senderUserID = resSenderUser.body.id;
+    const resSenderSession = await request(app)
+      .post("/api/v1/sessions")
+      .send({
+        email,
+        password,
+      });
+
+    if(resSenderSession.status !== 200) {
+      throw new AppError(
+        "Sender User Session creation error: " + resSenderSession?.body?.message
+      );
+    }
+
+    senderUserToken = resSenderSession.body.token;
 
     const resRecipientUser = await request(app)
       .post("/api/v1/users")
@@ -48,22 +60,24 @@ describe("Create Transfer Statement Controller", () => {
       );
     }
 
-    recipientUserID = resRecipientUser.body.id;
-
-    const resCreateSession = await request(app)
+    const resRecipientSession = await request(app)
       .post("/api/v1/sessions")
       .send({
         email,
         password,
       });
 
-    if(resCreateSession.status !== 200) {
+    if(resRecipientSession.status !== 200) {
       throw new AppError(
-        "Sender User Session creation error: " + resCreateSession?.body?.message
+        "Recipient User Session creation error: " + resRecipientSession?.body?.message
       );
     }
 
-    senderUserToken = resCreateSession.body.token;
+    recipientUserID = resRecipientSession.body.user.id;
+  })
+
+  afterEach(async () => {
+    await connection.query("DELETE FROM statements;");
   })
 
   afterAll(async () => {
@@ -100,5 +114,79 @@ describe("Create Transfer Statement Controller", () => {
 
     expect(resTransferStatement.status).toBe(201);
     expect(resTransferStatement.body).toHaveProperty("id");
+  })
+
+  it("Shouldn't be able to create a Transfer Statement without funds", async () => {
+    const resCreateInitialBalance = await request(app)
+      .post("/api/v1/statements/deposit")
+      .send({
+        amount: 100,
+        description: "Initial Balance"
+      })
+      .set({
+        Authorization: `Bearer ${senderUserToken}`
+      });
+
+    if(resCreateInitialBalance.status !== 201) {
+      throw new AppError(
+        "Create opening balance error: " + resCreateInitialBalance?.body?.message
+      );
+    }
+
+    const resTransferStatement = await request(app)
+      .post(`/api/v1/statements/transfer/${recipientUserID}`)
+      .send({
+        amount: 150,
+        description: "Test Transfer Statement"
+      })
+      .set({
+        Authorization: `Bearer ${senderUserToken}`
+      });
+
+    expect(resTransferStatement.status).toBe(400);
+    expect(resTransferStatement.body).toEqual({message: "Insufficient Founds!"});
+  })
+
+  it("Shouldn't be able to create a Transfer Statement without auth key", async () => {
+    const resStatement = await request(app)
+      .post(`/api/v1/statements/transfer/${recipientUserID}`)
+      .send({
+        amount: 150,
+        description: "Test Transfer Statement"
+      });
+
+    expect(resStatement.status).toBe(401);
+    expect(resStatement.body).toEqual({message: "JWT token is missing!"});
+  })
+
+  it("Shouldn't be able to create a Transfer Statement without valid Recipient User", async () => {
+    const resCreateInitialBalance = await request(app)
+      .post("/api/v1/statements/deposit")
+      .send({
+        amount: 200,
+        description: "Initial Balance"
+      })
+      .set({
+        Authorization: `Bearer ${senderUserToken}`
+      });
+
+    if(resCreateInitialBalance.status !== 201) {
+      throw new AppError(
+        "Create opening balance error: " + resCreateInitialBalance?.body?.message
+      );
+    }
+
+    const resStatement = await request(app)
+      .post("/api/v1/statements/transfer/368069f0-de55-5ca6-9ed6-147619eedb82")
+      .send({
+        amount: 150,
+        description: "Test Transfer Statement"
+      })
+      .set({
+        Authorization: `Bearer ${senderUserToken}`
+      });
+
+    expect(resStatement.status).toBe(404);
+    expect(resStatement.body).toEqual({message: "Recipient User not found!"});
   })
 })
