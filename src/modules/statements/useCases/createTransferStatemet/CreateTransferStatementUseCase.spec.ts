@@ -55,28 +55,6 @@ describe("Create Transfer Statement Use Case", () => {
     expect(transferStatement).toHaveProperty("id");
   })
 
-  it("Shouldn't be able to create a transfer statement to non existent Sender User", async () => {
-    const recipientUser = await usersRepository.create({
-      name: "Recipient User",
-      email: "recipient.user@fin_api.com.br",
-      password: "password123"
-    });
-
-    expect(recipientUser).toHaveProperty("id");
-
-    await expect(
-      createTransferStatementUseCase.execute({
-        amount: 150,
-        description: "Transfer test",
-        type: OperationType.TRANSFER,
-        user_id: recipientUser.id as string,
-        sender_id: "086d072a-535b-55c3-afa2-a9a3112e4b91"
-      })
-    ).rejects.toEqual(
-      new CreateTransferStatementError.UserNotFound()
-    );
-  })
-
   it("Shouldn't be able to create a transfer statement to non existent Recipient User", async () => {
     const senderUser = await usersRepository.create({
       name: "Sender User",
