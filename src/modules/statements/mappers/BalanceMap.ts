@@ -7,10 +7,19 @@ export class BalanceMap {
       amount,
       description,
       type,
+      sender_id = undefined,
       created_at,
       updated_at
     }) => (
-      {
+      type === 'transfer' ? {
+        id,
+        sender_id,
+        amount: Number(amount),
+        description,
+        type,
+        created_at,
+        updated_at
+      } : {
         id,
         amount: Number(amount),
         description,
