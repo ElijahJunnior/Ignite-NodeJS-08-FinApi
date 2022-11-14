@@ -70,4 +70,85 @@ describe("Get Balance Use Case", () => {
 
     expect(error).toEqual(new GetBalanceError());
   })
+
+  it("Should be able to get a user's balance after they send a transfer", async () => {
+    const { id: sender_id  } = await usersRepository.create({
+      email: "sender@fin_api.com",
+      name: "Sender User",
+      password: "password123"
+    }) as { id: string };
+
+    const { id: recipient_id  } = await usersRepository.create({
+      email: "recipient@fin_api.com",
+      name: "Recipient User",
+      password: "password123"
+    }) as { id: string };
+
+    const statement1 = await statementsRepository.create({
+      user_id: sender_id,
+      amount: 200,
+      description: "Initial balance statement",
+      type: OperationType.DEPOSIT
+    });
+
+    const statement2 = await statementsRepository.create({
+      user_id: recipient_id,
+      amount: 100,
+      description: "Transfer statement",
+      type: OperationType.TRANSFER,
+      sender_id
+    });
+
+    const resultReceived = await getBalanceUseCase.execute({user_id: sender_id});
+
+    const resultExpected = {
+      statement: [
+        statement1,
+        statement2,
+      ],
+      balance: 100,
+    };
+
+    expect(resultReceived).toEqual(resultExpected);
+  })
+
+  it("Should be able to get a user's balance after they receive a transfer", async () => {
+    const { id: sender_id  } = await usersRepository.create({
+      email: "sender@fin_api.com",
+      name: "Sender User",
+      password: "password123"
+    }) as { id: string };
+
+    const { id: recipient_id  } = await usersRepository.create({
+      email: "recipient@fin_api.com",
+      name: "Recipient User",
+      password: "password123"
+    }) as { id: string };
+
+    const statement1 = await statementsRepository.create({
+      user_id: sender_id,
+      amount: 200,
+      description: "Initial balance statement",
+      type: OperationType.DEPOSIT
+    });
+
+    const statement2 = await statementsRepository.create({
+      user_id: recipient_id,
+      amount: 100,
+      description: "Transfer statement",
+      type: OperationType.TRANSFER,
+      sender_id
+    });
+
+    const resultReceived = await getBalanceUseCase.execute({user_id: recipient_id});
+
+    const resultExpected = {
+      statement: [
+        statement2,
+      ],
+      balance: 100,
+    };
+
+    expect(resultReceived).toEqual(resultExpected);
+  })
 })
